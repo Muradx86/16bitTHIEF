@@ -1,0 +1,75 @@
+BITS 16
+ORG 0x7C00
+
+section .bss
+BUFF: resb 96
+DATAS: resb 32
+section .text
+global FUN
+	IN AL,0x92
+	AND AL,0
+	OUT 0x92,AL
+	JMP FUN
+
+PRINT_CPU:
+	LODSB
+	CMP AL,0
+	JE .R
+	MOV AH,14
+	INT 0x10
+	JMP PRINT_CPU
+.R:
+	RET
+
+FUN:
+	CLC
+	CLD
+	
+	XOR EAX,EAX
+	MOV DS,AX
+	MOV ES,AX
+	MOV SS,AX
+	MOV SP,0x7C00
+
+	;Get CPU vendor string
+	CPUID
+	MOV [BUFF],EBX
+	MOV [BUFF + 4],EDX
+	MOV [BUFF + 8],ECX
+
+	;Print vendor string
+	MOV SI,BUFF
+	CALL PRINT_CPU
+
+	MOV AX,0xB800
+	XOR DI,DI
+	MOV ES,AX
+
+	XOR CX,CX
+	XOR BX,BX
+	CALL GET_IP
+
+JK_LOOP:
+	MOV DX,[DS:SI]
+
+	;VGA operations
+	OR DX,0x20
+	MOV WORD [ES:DI],DX
+	ADD DI,2
+	;Addres operations
+	INC SI
+	CMP SI,0xFFFF
+	
+	JMP JK_LOOP
+
+GET_IP:
+	POP DS
+	RET
+
+HALT:
+	CLI
+	HLT
+	JMP HALT		
+	
+TIMES 510-($-$$) DB 0
+DW 0xAA55
