@@ -1,11 +1,11 @@
-asm {
-LABEL::
-  PUSH RBP
-  MOV RBP,RSP
-
-  CLI
-  HLT
-  POP RBP
-  RET
-};
-Call(LABEL);
+U0 Idk()
+{
+  I64 i=0;
+  while(TRUE){
+    RDTSC
+    SHL    RDX,32
+    MOV    EAX,EAX
+    i++;
+  }
+}
+Idk;
